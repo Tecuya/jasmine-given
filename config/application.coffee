@@ -42,7 +42,7 @@ application = lineman.config.extend "application",
       minijasminenode:
         showColors: true
       helpers: "spec-e2e/helpers/**/*.{js,coffee}"
-      specs: "spec-e2e/**/*.{js,coffee}"
+      specs: ["spec-e2e/**/*.{js,coffee}", "!spec-e2e/tmp/**"]
 
   concat:
     uncompressedDist:
