@@ -3,7 +3,7 @@
   mostRecentlyUsed = null
 
   beforeEach ->
-    @addMatchers(jasmine._given.matchers)
+    jasmine.addMatchers(jasmine._given.matchers)
   root = @
 
   root.Given = ->
@@ -99,25 +99,29 @@
 
   jasmine._given =
     matchers:
-      toHaveReturnedFalseFromThen: (context, n, done) ->
-        result = false
-        exception = undefined
-        try
-          result = @actual.call(context, done)
-        catch e
-          exception = e
-        @message = ->
-          stringyExpectation = stringifyExpectation(@actual)
-          msg = "Then clause#{if n > 1 then " ##{n}" else ""} `#{stringyExpectation}` failed by "
-          if exception
-            msg += "throwing: " + exception.toString()
-          else
-            msg += "returning false"
-          msg += additionalInsightsForErrorMessage(stringyExpectation)
+      toHaveReturnedFalseFromThen: (util, customEqualityTesters) ->
+        compare: (actual, context, n, done) ->
+            result = false
+            exception = undefined
+            try
+              result = actual.call(context, done)
+            catch e
+              exception = e
 
-          msg
+            ret = pass: (result == false)
 
-        result == false
+            if exception isnt `undefined`
+                stringyExpectation = stringifyExpectation(actual)
+                msg = "Then clause#{if n > 1 then " ##{n}" else ""} `#{stringyExpectation}` failed by "
+                if exception
+                    msg += "throwing: " + exception.toString()
+                else
+                    msg += "returning false"
+                msg += additionalInsightsForErrorMessage(stringyExpectation)
+
+                ret.message = msg
+
+            return ret
 
   stringifyExpectation = (expectation) ->
     matches = expectation.toString().replace(/\n/g,'').match(/function\s?\(.*\)\s?{\s*(return\s+)?(.*?)(;)?\s*}/i)

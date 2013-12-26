@@ -9,7 +9,7 @@
     var Waterfall, additionalInsightsForErrorMessage, apparentReferenceError, attemptedEquality, comparisonInsight, declareJasmineSpec, deepEqualsNotice, doneWrapperFor, evalInContextOfSpec, finalStatementFrom, getBlock, invariantList, mostRecentExpectations, mostRecentlyUsed, o, root, stringifyExpectation, wasComparison, whenList, wrapAsExpectations;
     mostRecentlyUsed = null;
     beforeEach(function() {
-      return this.addMatchers(jasmine._given.matchers);
+      return jasmine.addMatchers(jasmine._given.matchers);
     });
     root = this;
     root.Given = function() {
@@ -146,29 +146,35 @@
     };
     jasmine._given = {
       matchers: {
-        toHaveReturnedFalseFromThen: function(context, n, done) {
-          var e, exception, result;
-          result = false;
-          exception = void 0;
-          try {
-            result = this.actual.call(context, done);
-          } catch (_error) {
-            e = _error;
-            exception = e;
-          }
-          this.message = function() {
-            var msg, stringyExpectation;
-            stringyExpectation = stringifyExpectation(this.actual);
-            msg = "Then clause" + (n > 1 ? " #" + n : "") + " `" + stringyExpectation + "` failed by ";
-            if (exception) {
-              msg += "throwing: " + exception.toString();
-            } else {
-              msg += "returning false";
+        toHaveReturnedFalseFromThen: function(util, customEqualityTesters) {
+          return {
+            compare: function(actual, context, n, done) {
+              var e, exception, msg, result, ret, stringyExpectation;
+              result = false;
+              exception = void 0;
+              try {
+                result = actual.call(context, done);
+              } catch (_error) {
+                e = _error;
+                exception = e;
+              }
+              ret = {
+                pass: result === false
+              };
+              if (exception !== undefined) {
+                stringyExpectation = stringifyExpectation(actual);
+                msg = "Then clause" + (n > 1 ? " #" + n : "") + " `" + stringyExpectation + "` failed by ";
+                if (exception) {
+                  msg += "throwing: " + exception.toString();
+                } else {
+                  msg += "returning false";
+                }
+                msg += additionalInsightsForErrorMessage(stringyExpectation);
+                ret.message = msg;
+              }
+              return ret;
             }
-            msg += additionalInsightsForErrorMessage(stringyExpectation);
-            return msg;
           };
-          return result === false;
         }
       }
     };
